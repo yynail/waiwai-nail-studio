@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 800px;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #fce4ec 0%, #fff5f7 50%, #f3e5f5 100%);
+  padding: 40px;
+}
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.logo {
+  font-size: 36px;
+  font-weight: 800;
+  color: #e91e63;
+  margin-bottom: 8px;
+}
+.subtitle {
+  font-size: 16px;
+  color: #999;
+}
+.tagline {
+  display: inline-block;
+  background: #e91e63;
+  color: #fff;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modules {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.module-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #333;
+}
+.module-icon {
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fce4ec;
+  border-radius: 8px;
+}
+.features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+.feature-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat-item {
+  text-align: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+.stat-num {
+  font-size: 24px;
+  font-weight: 800;
+  color: #e91e63;
+}
+.stat-label {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+.footer {
+  text-align: center;
+  margin-top: 24px;
+  color: #bbb;
+  font-size: 12px;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-pink { background: #fce4ec; color: #e91e63; }
+.badge-green { background: #e8f5e9; color: #4caf50; }
+.badge-blue { background: #e3f2fd; color: #2196f3; }
+.badge-orange { background: #fff3e0; color: #ff9800; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">💅 歪歪美甲工作室</div>
+    <div class="subtitle">美甲店智能管理工作台</div>
+    <div class="tagline">PWA 手机桌面 APP</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num">9</div>
+      <div class="stat-label">功能模块</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">5,464</div>
+      <div class="stat-label">行代码</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">12</div>
+      <div class="stat-label">数据表</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 功能模块</div>
+    <div class="modules">
+      <div class="module-item"><div class="module-icon">📊</div>首页看板</div>
+      <div class="module-item"><div class="module-icon">👥</div>会员管理</div>
+      <div class="module-item"><div class="module-icon">📅</div>预约管理</div>
+      <div class="module-item"><div class="module-icon">💰</div>财务管理</div>
+      <div class="module-item"><div class="module-icon">🎨</div>款式库</div>
+      <div class="module-item"><div class="module-icon">⭐</div>积分管理</div>
+      <div class="module-item"><div class="module-icon">📈</div>营销管理</div>
+      <div class="module-item"><div class="module-icon">🔔</div>通知中心</div>
+      <div class="module-item"><div class="module-icon">⚙️</div>系统设置</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">✨ 核心功能亮点</div>
+    <div class="features">
+      <div class="feature-item"><span class="feature-icon">💳</span>储值卡 + 次卡双模式，智能扣款，余额实时同步</div>
+      <div class="feature-item"><span class="feature-icon">🔔</span>预约闹钟：系统闹钟 + 浏览器铃声 + 手机振动</div>
+      <div class="feature-item"><span class="feature-icon">🆕</span>新客/老客标签，自动统计回头客率</div>
+      <div class="feature-item"><span class="feature-icon">💲</span>预约填写价格，列表一目了然</div>
+      <div class="feature-item"><span class="feature-icon">📱</span>消费后自动弹出短信面板通知顾客</div>
+      <div class="feature-item"><span class="feature-icon">💰</span>收入记录：手部美甲/足部美甲/美睫/美团/抖音</div>
+      <div class="feature-item"><span class="feature-icon">🎁</span>充值金额 + 赠送金额，双重记录</div>
+      <div class="feature-item"><span class="feature-icon">💾</span>一键备份/恢复，数据永不丢失</div>
+      <div class="feature-item"><span class="feature-icon">📊</span>月度收支利润图，1~6月/7~12月切换</div>
+      <div class="feature-item"><span class="feature-icon">🏠</span>PWA 桌面图标，全屏体验，离线可用</div>
+      <div class="feature-item"><span class="feature-icon">📋</span>每日工作汇报，一键复制分享</div>
+      <div class="feature-item"><span class="feature-icon">⭐</span>消费积分 + 积分兑换 + 任务奖励系统</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏷️ 技术特性</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <span class="badge badge-pink">纯前端 SPA</span>
+      <span class="badge badge-pink">localStorage 存储</span>
+      <span class="badge badge-green">PWA 离线可用</span>
+      <span class="badge badge-green">Service Worker</span>
+      <span class="badge badge-blue">响应式设计</span>
+      <span class="badge badge-blue">Hash 路由</span>
+      <span class="badge badge-orange">Web Audio 铃声</span>
+      <span class="badge badge-orange">Vibration API</span>
+      <span class="badge badge-pink">SMS 协议</span>
+      <span class="badge badge-green">通知 API</span>
+      <span class="badge badge-blue">左侧导航</span>
+      <span class="badge badge-orange">弹幕通知</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📐 项目结构</div>
+    <div style="font-size:13px;color:#666;line-height:2;font-family:monospace">
+      📄 index.html &nbsp;&nbsp;— 页面骨架 + PWA 配置（114行）<br>
+      🎨 style.css &nbsp;&nbsp;— 响应式样式 + 安全区域适配（1215行）<br>
+      ⚙️ app.js &nbsp;&nbsp;&nbsp;&nbsp;— 数据层 + 路由 + 弹幕 + 通知引擎（1402行）<br>
+      🖥️ views.js &nbsp;&nbsp;— 全部视图渲染 + 交互逻辑（2658行）<br>
+      🔧 sw.js &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Service Worker 离线缓存（53行）<br>
+      📋 manifest.json — PWA 应用清单<br>
+      🎨 icons/ &nbsp;&nbsp;&nbsp;&nbsp;— 8个尺寸 APP 图标（72~512px）
+    </div>
+  </div>
+
+  <div class="footer">
+    歪歪美甲工作室 · 最终版本 · 2026年7月30日
+  </div>
+</body>
+</html>

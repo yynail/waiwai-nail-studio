@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>歪歪美甲工作室</title>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="歪歪美甲">
+<link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+<meta name="theme-color" content="#e91e63">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 侧边导航（桌面端） -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h1 class="logo">💅 歪歪美甲工作室</h1>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-item active" data-route="dashboard" onclick="Router.go('dashboard')">
+      <span class="nav-icon">📊</span>
+      <span>首页看板</span>
+    </div>
+    <div class="nav-item" data-route="members" onclick="Router.go('members')">
+      <span class="nav-icon">👥</span>
+      <span>会员管理</span>
+    </div>
+    <div class="nav-item" data-route="appointments" onclick="Router.go('appointments')">
+      <span class="nav-icon">📅</span>
+      <span>预约管理</span>
+    </div>
+    <div class="nav-item" data-route="finance" onclick="Router.go('finance')">
+      <span class="nav-icon">💰</span>
+      <span>财务管理</span>
+    </div>
+    <div class="nav-item" data-route="styles" onclick="Router.go('styles')">
+      <span class="nav-icon">🎨</span>
+      <span>款式库</span>
+    </div>
+    <div class="nav-item" data-route="points" onclick="Router.go('points')">
+      <span class="nav-icon">⭐</span>
+      <span>积分管理</span>
+    </div>
+    <div class="nav-item" data-route="marketing" onclick="Router.go('marketing')">
+      <span class="nav-icon">📈</span>
+      <span>营销管理</span>
+    </div>
+    <div class="nav-item" data-route="notifications" onclick="Router.go('notifications')">
+      <span class="nav-icon">🔔</span>
+      <span>通知中心</span>
+      <span class="nav-badge" id="notif-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" data-route="settings" onclick="Router.go('settings')">
+      <span class="nav-icon">⚙️</span>
+      <span>设置</span>
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-date" id="sidebar-date"></div>
+  </div>
+</nav>
+
+<!-- 主内容区 -->
+<div id="main-content"></div>
+
+<!-- 移动端底部导航 -->
+<nav id="mobile-nav">
+  <div class="mobile-nav-item active" data-route="dashboard" onclick="Router.go('dashboard')">
+    <span>📊</span><small>首页</small>
+  </div>
+  <div class="mobile-nav-item" data-route="members" onclick="Router.go('members')">
+    <span>👥</span><small>会员</small>
+  </div>
+  <div class="mobile-nav-item" data-route="appointments" onclick="Router.go('appointments')">
+    <span>📅</span><small>预约</small>
+  </div>
+  <div class="mobile-nav-item" data-route="finance" onclick="Router.go('finance')">
+    <span>💰</span><small>财务</small>
+  </div>
+  <div class="mobile-nav-item" data-route="notifications" onclick="Router.go('notifications')">
+    <span>🔔</span><small>通知</small>
+    <span class="mobile-badge" id="notif-badge-mobile" style="display:none">0</span>
+  </div>
+</nav>
+
+<!-- Toast 容器 -->
+<div id="toast-container"></div>
+
+<!-- 弹幕容器 -->
+<div id="danmaku-container"></div>
+
+<script src="app.js"></script>
+<script src="views.js"></script>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('✅ Service Worker 注册成功', reg.scope);
+  }).catch(function(err) {
+    console.log('❌ Service Worker 注册失败', err);
+  });
+}
+</script>
+</body>
+</html>
