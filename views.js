@@ -2388,6 +2388,7 @@ function openIncomeForm() {
       <div class="form-group">
         <label>收入类目</label>
         <select id="inc-category">
+          <option value="定金">💎 定金</option>
           <option value="手部美甲项目">💅 手部美甲项目</option>
           <option value="足部美甲项目">🦶 足部美甲项目</option>
           <option value="美睫项目">👁️ 美睫项目</option>
