@@ -387,6 +387,11 @@ ${birthdayCustomers.length > 0 ? '🎂 本月生日顾客：' + birthdayCustomer
     const otherIncome = DataStore.getMonthlyOtherIncome(year, month);
     const profit = income - expense;
 
+    // 本周统计
+    const weekIncome = DataStore.getWeekIncome();
+    const weekExpense = DataStore.getWeekExpense();
+    const weekProfit = weekIncome - weekExpense;
+
     // 获取本月收支明细
     const prefix = `${year}-${String(month).padStart(2, '0')}`;
     const monthTxns = DataStore.getTransactions().filter(t => t.date.startsWith(prefix)).sort((a, b) => b.createdAt - a.createdAt);
@@ -436,6 +441,31 @@ ${birthdayCustomers.length > 0 ? '🎂 本月生日顾客：' + birthdayCustomer
             <div class="stat-title">本月利润</div>
             <div class="stat-value" style="color:${profit>=0?'#4caf50':'#f44336'}">${Utils.formatMoney(profit)}</div>
             <div class="stat-sub">利润率 ${income > 0 ? (profit/income*100).toFixed(1) : 0}%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 本周统计 -->
+      <div class="stats-grid" style="margin-bottom:12px">
+        <div class="stat-card" style="border:2px solid #e8f5e9">
+          <div class="stat-icon" style="background:#e8f5e9;color:#4caf50">📅</div>
+          <div class="stat-info">
+            <div class="stat-title">本周收入</div>
+            <div class="stat-value">${Utils.formatMoney(weekIncome)}</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border:2px solid #ffebee">
+          <div class="stat-icon" style="background:#ffebee;color:#f44336">📤</div>
+          <div class="stat-info">
+            <div class="stat-title">本周支出</div>
+            <div class="stat-value">${Utils.formatMoney(weekExpense)}</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border:2px solid #e3f2fd">
+          <div class="stat-icon" style="background:#e3f2fd;color:#2196f3">💎</div>
+          <div class="stat-info">
+            <div class="stat-title">本周利润</div>
+            <div class="stat-value" style="color:${weekProfit>=0?'#4caf50':'#f44336'}">${Utils.formatMoney(weekProfit)}</div>
           </div>
         </div>
       </div>

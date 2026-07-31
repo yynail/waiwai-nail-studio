@@ -642,6 +642,38 @@ const DataStore = {
       .reduce((sum, t) => sum + (t.amount || 0), 0);
   },
 
+  /** 本周收入（周一到周日） */
+  getWeekIncome() {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset);
+    const mondayStr = monday.toISOString().split('T')[0];
+
+    return this.getTransactions()
+      .filter(t => t.date >= mondayStr && (t.type === 'recharge' || t.type === 'consume' || t.type === 'income'))
+      .reduce((sum, t) => {
+        if (t.type === 'income') return sum + (t.amount || 0);
+        if (t.type === 'recharge') return sum + (t.amount || 0) + (t.bonusAmount || 0);
+        return sum + (t.actualPrice || 0);
+      }, 0);
+  },
+
+  /** 本周支出 */
+  getWeekExpense() {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset);
+    const mondayStr = monday.toISOString().split('T')[0];
+
+    return this.getTransactions()
+      .filter(t => t.date >= mondayStr && t.type === 'expense')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
+  },
+
   getTodayIncome() {
     const today = Utils.today();
     return this.getTransactions()
