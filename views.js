@@ -40,6 +40,16 @@ const Views = {
         <div style="color:var(--text-muted)">${today} | ${DataStore.getSettings().shopName}</div>
       </div>
 
+      ${'Notification' in window && Notification.permission === 'default' ? `
+      <div class="card" style="border:2px solid #ff9800;background:#fff8e1;margin-bottom:12px">
+        <div class="card-body" style="display:flex;align-items:center;gap:10px;padding:12px">
+          <span style="font-size:24px">🔔</span>
+          <div style="flex:1;font-size:13px;color:#666">开启通知权限后，预约时间到会有铃声+弹窗提醒</div>
+          <button class="btn btn-sm" style="background:#ff9800;color:#fff;white-space:nowrap" onclick="requestNotificationPermission();this.closest('.card').remove()">开启</button>
+        </div>
+      </div>
+      ` : ''}
+
       <!-- 统计卡片 -->
       <div class="stats-grid">
         <div class="stat-card">
@@ -1751,7 +1761,8 @@ function openAppointmentForm(dateStr) {
     });
 
     // 设置闹钟提醒
-    scheduleAppointmentAlarm(aptDate, startTime, project);
+    const newApt = DataStore.getAppointments().slice(-1)[0];
+    scheduleAppointmentAlarm(aptDate, startTime, project, newApt ? newApt.id : null);
 
     overlay.remove();
     Utils.showToast(`预约「${project}」创建成功，开始时间到会铃声提醒`, 'success');
@@ -1761,58 +1772,116 @@ function openAppointmentForm(dateStr) {
 
 /**
  * 预约到时间铃声提醒
+ * 改进版：每次打开APP自动恢复所有闹钟 + 后台也能通知
  */
-function scheduleAppointmentAlarm(dateStr, timeStr, project) {
+let _activeAlarms = {}; // 存储所有活跃的闹钟timer
+
+function scheduleAppointmentAlarm(dateStr, timeStr, project, aptId) {
   const alarmTime = new Date(`${dateStr}T${timeStr}:00`);
   const now = new Date();
 
   if (alarmTime <= now) return;
 
-  // 通过 WorkBuddy 在你的手机上设置系统闹钟（退出后台也能响）
-  try {
-    mcp__workbuddy_device__create_alarm({
-      time: alarmTime.toISOString(),
-      label: `💅 预约：${project}`
-    });
-    console.log('开始时间闹钟已设置:', project, alarmTime.toISOString());
-  } catch(e) {
-    console.log('开始时间闹钟设置失败:', e);
+  const msUntil = alarmTime.getTime() - now.getTime();
+  const key = aptId || `${dateStr}_${timeStr}_${project}`;
+
+  // 如果已有同名闹钟，先清掉
+  if (_activeAlarms[key]) clearTimeout(_activeAlarms[key]);
+
+  // 设置新的 timer
+  _activeAlarms[key] = setTimeout(() => {
+    triggerAlarm(project, dateStr, timeStr);
+  }, msUntil);
+
+  console.log('闹钟已设置:', project, alarmTime.toLocaleString());
+}
+
+/**
+ * 触发闹钟：铃声 + 振动 + 系统通知 + 弹窗
+ */
+function triggerAlarm(project, dateStr, timeStr) {
+  // 1. 播放铃声（循环直到用户关闭）
+  playAlarmSound();
+
+  // 2. 手机振动
+  if (navigator.vibrate) {
+    navigator.vibrate([500, 200, 500, 200, 500, 200, 500]);
   }
 
-  // 同时在浏览器端设置提醒（页面内弹窗+声音+振动）
-  const msUntil = alarmTime.getTime() - now.getTime();
-  setTimeout(() => {
-    // 播放铃声（循环直到用户关闭）
-    playAlarmSound();
-    // 手机振动
-    if (navigator.vibrate) {
-      navigator.vibrate([500, 200, 500, 200, 500]);
-    }
-    // 浏览器通知
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('⏰ 预约开始时间到！', { body: `${project} - ${dateStr} ${timeStr} 开始`, icon: '💅' });
-    }
-    // 弹窗提醒
-    const alarmOverlay = document.createElement('div');
-    alarmOverlay.className = 'modal-overlay';
-    alarmOverlay.style.zIndex = '9999';
-    alarmOverlay.innerHTML = `
-      <div class="modal modal-sm" style="text-align:center;animation:pulse 0.6s ease infinite alternate">
-        <div class="modal-header" style="background:#e91e63;color:#fff;border-radius:12px 12px 0 0">
-          <h3>⏰ 预约开始时间到！</h3>
-        </div>
-        <div class="modal-body">
-          <div style="font-size:48px;margin:16px 0">💅</div>
-          <h2 style="font-size:20px;color:#e91e63">${Utils.escapeHtml(project)}</h2>
-          <p style="font-size:16px;color:#666;margin-top:8px">开始时间：${dateStr} ${timeStr}</p>
-        </div>
-        <div class="modal-footer" style="justify-content:center">
-          <button class="btn btn-primary btn-lg" onclick="this.closest('.modal-overlay').remove();stopAlarmSound()">知道了</button>
-        </div>
+  // 3. 系统通知（后台也能收到）
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      // 通过 Service Worker 发送通知（更可靠）
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SHOW_NOTIFICATION',
+          title: '⏰ 预约开始时间到！',
+          body: `${project} - ${dateStr} ${timeStr} 开始`,
+          icon: '/icons/icon-192x192.png'
+        });
+      } else {
+        const notif = new Notification('⏰ 预约开始时间到！', {
+          body: `${project} - ${dateStr} ${timeStr} 开始`,
+          icon: '/icons/icon-192x192.png',
+          tag: 'appointment-alarm',
+          requireInteraction: true
+        });
+        notif.onclick = function() { window.focus(); this.close(); };
+      }
+    } catch(e) { console.log('通知失败:', e); }
+  }
+
+  // 4. 页面内弹窗提醒
+  const alarmOverlay = document.createElement('div');
+  alarmOverlay.className = 'modal-overlay';
+  alarmOverlay.style.zIndex = '9999';
+  alarmOverlay.innerHTML = `
+    <div class="modal modal-sm" style="text-align:center;animation:pulse 0.6s ease infinite alternate">
+      <div class="modal-header" style="background:#e91e63;color:#fff;border-radius:12px 12px 0 0">
+        <h3>⏰ 预约开始时间到！</h3>
       </div>
-    `;
-    document.body.appendChild(alarmOverlay);
-  }, msUntil);
+      <div class="modal-body">
+        <div style="font-size:48px;margin:16px 0">💅</div>
+        <h2 style="font-size:20px;color:#e91e63">${Utils.escapeHtml(project)}</h2>
+        <p style="font-size:16px;color:#666;margin-top:8px">开始时间：${dateStr} ${timeStr}</p>
+      </div>
+      <div class="modal-footer" style="justify-content:center">
+        <button class="btn btn-primary btn-lg" onclick="this.closest('.modal-overlay').remove();stopAlarmSound()">知道了</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(alarmOverlay);
+}
+
+/**
+ * APP打开时恢复所有未到时间的预约闹钟
+ */
+function restoreAllAlarms() {
+  const apts = DataStore.getAppointments();
+  const now = new Date();
+
+  apts.forEach(apt => {
+    if (apt.status === 'cancelled' || apt.status === 'completed') return;
+
+    const startTime = apt.timeSlot ? apt.timeSlot.split('-')[0] : '';
+    if (!startTime) return;
+
+    const alarmTime = new Date(`${apt.date}T${startTime}:00`);
+    if (alarmTime <= now) return;
+
+    scheduleAppointmentAlarm(apt.date, startTime, apt.styleName || '未命名项目', apt.id);
+  });
+}
+
+/**
+ * 请求通知权限
+ */
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(result => {
+      console.log('通知权限:', result);
+    });
+  }
 }
 
 // 铃声播放（使用 audio 元素 + 内联 WAV，更可靠）

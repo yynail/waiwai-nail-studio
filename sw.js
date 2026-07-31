@@ -1,5 +1,5 @@
 // 歪歪美甲工作室 - Service Worker
-const CACHE_NAME = 'nail-studio-v3';
+const CACHE_NAME = 'nail-studio-v4';
 const ASSETS = [
   '/',
   '/index.html',
@@ -48,6 +48,34 @@ self.addEventListener('fetch', event => {
       return response;
     }).catch(() => {
       return caches.match(event.request);
+    })
+  );
+});
+
+// 接收通知消息并显示
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { title, body, icon } = event.data;
+    self.registration.showNotification(title || '⏰ 预约提醒', {
+      body: body || '',
+      icon: icon || '/icons/icon-192x192.png',
+      tag: 'appointment-alarm',
+      requireInteraction: true,
+      vibrate: [500, 200, 500, 200, 500, 200, 500]
+    });
+  }
+});
+
+// 点击通知后打开APP
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then(clients => {
+      if (clients.length > 0) {
+        clients[0].focus();
+      } else {
+        self.clients.openWindow('/');
+      }
     })
   );
 });

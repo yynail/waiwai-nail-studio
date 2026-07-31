@@ -1365,6 +1365,15 @@ function initApp() {
   // 更新通知徽标
   updateNotificationBadge();
 
+  // 请求通知权限并恢复所有预约闹钟
+  if (typeof requestNotificationPermission === 'function') requestNotificationPermission();
+  if (typeof restoreAllAlarms === 'function') restoreAllAlarms();
+
+  // 每30秒检查一次，防止setTimeout被浏览器节流
+  setInterval(() => {
+    if (typeof restoreAllAlarms === 'function') restoreAllAlarms();
+  }, 30000);
+
   // 启动路由
   Router.init();
 
