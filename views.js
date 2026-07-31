@@ -1806,11 +1806,31 @@ function openAppointmentForm(dateStr) {
  */
 let _activeAlarms = {}; // 存储所有活跃的闹钟timer
 
+function isValidTimeFormat(timeStr) {
+  return /^([0-1]?\d|2[0-3]):[0-5]\d$/.test(timeStr);
+}
+
 function scheduleAppointmentAlarm(dateStr, timeStr, project, aptId) {
+  // 严格校验日期和时间格式
+  if (!dateStr || !isValidTimeFormat(timeStr)) {
+    console.log('日期或时间格式无效，跳过闹钟:', dateStr, timeStr);
+    return;
+  }
+
   const alarmTime = new Date(`${dateStr}T${timeStr}:00`);
   const now = new Date();
 
-  if (alarmTime <= now) return;
+  // 再次检查是否是有效日期
+  if (isNaN(alarmTime.getTime())) {
+    console.log('无效日期:', dateStr, timeStr);
+    return;
+  }
+
+  // 如果预约时间已经过去，不设置闹钟
+  if (alarmTime.getTime() <= now.getTime()) {
+    console.log('预约时间已过，跳过:', project, alarmTime.toLocaleString());
+    return;
+  }
 
   const msUntil = alarmTime.getTime() - now.getTime();
   const key = aptId || `${dateStr}_${timeStr}_${project}`;
@@ -1818,12 +1838,12 @@ function scheduleAppointmentAlarm(dateStr, timeStr, project, aptId) {
   // 如果已有同名闹钟，先清掉
   if (_activeAlarms[key]) clearTimeout(_activeAlarms[key]);
 
-  // 设置新的 timer
+  // 设置新的 timer（最多2147483647ms，约24.8天）
   _activeAlarms[key] = setTimeout(() => {
     triggerAlarm(project, dateStr, timeStr);
-  }, msUntil);
+  }, Math.min(msUntil, 2147483647));
 
-  console.log('闹钟已设置:', project, alarmTime.toLocaleString());
+  console.log('闹钟已设置:', project, alarmTime.toLocaleString(), '还有', Math.round(msUntil/1000), '秒');
 }
 
 /**
@@ -1875,8 +1895,9 @@ function triggerAlarm(project, dateStr, timeStr) {
         <h2 style="font-size:20px;color:#e91e63">${Utils.escapeHtml(project)}</h2>
         <p style="font-size:16px;color:#666;margin-top:8px">开始时间：${dateStr} ${timeStr}</p>
       </div>
-      <div class="modal-footer" style="justify-content:center">
+      <div class="modal-footer" style="justify-content:center;flex-direction:column;gap:8px">
         <button class="btn btn-primary btn-lg" onclick="this.closest('.modal-overlay').remove();stopAlarmSound()">知道了</button>
+        <button class="btn btn-outline" onclick="playAlarmSound()">🔔 重播铃声</button>
       </div>
     </div>
   `;
@@ -1890,14 +1911,18 @@ function restoreAllAlarms() {
   const apts = DataStore.getAppointments();
   const now = new Date();
 
+  // 清理旧的闹钟
+  Object.values(_activeAlarms).forEach(timer => clearTimeout(timer));
+  _activeAlarms = {};
+
   apts.forEach(apt => {
     if (apt.status === 'cancelled' || apt.status === 'completed') return;
 
     const startTime = apt.timeSlot ? apt.timeSlot.split('-')[0] : '';
-    if (!startTime) return;
+    if (!startTime || !isValidTimeFormat(startTime)) return;
 
     const alarmTime = new Date(`${apt.date}T${startTime}:00`);
-    if (alarmTime <= now) return;
+    if (isNaN(alarmTime.getTime()) || alarmTime.getTime() <= now.getTime()) return;
 
     scheduleAppointmentAlarm(apt.date, startTime, apt.styleName || '未命名项目', apt.id);
   });
@@ -1916,6 +1941,18 @@ function requestNotificationPermission() {
 
 // 铃声播放（使用 audio 元素 + 内联 WAV，更可靠）
 let alarmAudioEl = null;
+let _audioUnlocked = false;
+
+function unlockAudio() {
+  if (_audioUnlocked) return;
+  try {
+    const silent = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+    silent.play().then(() => {
+      _audioUnlocked = true;
+      console.log('音频已解锁');
+    }).catch(e => {});
+  } catch(e) {}
+}
 
 function playAlarmSound() {
   stopAlarmSound();
@@ -1958,11 +1995,15 @@ function playAlarmSound() {
 
   alarmAudioEl = new Audio(url);
   alarmAudioEl.loop = true;
-  alarmAudioEl.volume = 0.8;
-  alarmAudioEl.play().catch(e => {
-    // 如果自动播放被阻止，创建用户可点击的播放按钮
-    console.log('自动播放被阻止，需要用户交互');
-  });
+  alarmAudioEl.volume = 1.0;
+
+  // iOS 需要用户交互后才能播放
+  const playPromise = alarmAudioEl.play();
+  if (playPromise) {
+    playPromise.catch(e => {
+      console.log('自动播放被阻止:', e);
+    });
+  }
 }
 
 function stopAlarmSound() {

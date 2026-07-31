@@ -1401,6 +1401,15 @@ function initApp() {
   if (typeof requestNotificationPermission === 'function') requestNotificationPermission();
   if (typeof restoreAllAlarms === 'function') restoreAllAlarms();
 
+  // 首次用户交互时解锁音频（iOS需要）
+  const audioUnlock = () => {
+    if (typeof unlockAudio === 'function') unlockAudio();
+    document.removeEventListener('touchstart', audioUnlock);
+    document.removeEventListener('click', audioUnlock);
+  };
+  document.addEventListener('touchstart', audioUnlock, { once: true });
+  document.addEventListener('click', audioUnlock, { once: true });
+
   // 每30秒检查一次，防止setTimeout被浏览器节流
   setInterval(() => {
     if (typeof restoreAllAlarms === 'function') restoreAllAlarms();
